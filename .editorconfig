@@ -1,0 +1,5 @@
+root = true
+[*.cs]
+dotnet_diagnostic.IDE0005.severity = warning
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_prefer_switch_expression = true:suggestion

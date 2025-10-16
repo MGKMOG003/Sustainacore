@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Sustainacore.Application\Sustainacore.Application.csproj" />
+    <ProjectReference Include="..\..\Core\Sustainacore.Domain\Sustainacore.Domain.csproj" />
+    <ProjectReference Include="..\..\Core\Sustainacore.SharedKernel\Sustainacore.SharedKernel.csproj" />
+    <ProjectReference Include="..\Sustainacore.Firebase\Sustainacore.Firebase.csproj" />
+    <ProjectReference Include="..\Sustainacore.Payments\Sustainacore.Payments.csproj" />
+  </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+</Project>

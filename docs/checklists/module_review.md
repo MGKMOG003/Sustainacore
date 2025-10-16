@@ -1,0 +1,6 @@
+- [ ] Commands validate inputs with FluentValidation
+- [ ] Handlers are idempotent where required
+- [ ] Domain events emitted on state changes
+- [ ] Outbox records created within transaction
+- [ ] ProblemDetails mapping for all errors
+- [ ] Policies cover authorization and invariants

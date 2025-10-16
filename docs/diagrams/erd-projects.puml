@@ -1,0 +1,26 @@
+﻿@startuml
+!theme plain
+entity "Project" as Project {
+  + ProjectId
+  Name
+  Budget
+  StartDate
+  EndDate
+}
+entity "Phase" as Phase {
+  + PhaseId
+  ProjectId
+  Name
+  PlannedStart
+  PlannedEnd
+}
+entity "Task" as Task {
+  + TaskId
+  PhaseId
+  Name
+  DurationDays
+  DependsOnTaskId
+}
+Project ||--o{ Phase
+Phase ||--o{ Task
+@enduml

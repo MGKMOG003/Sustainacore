@@ -1,0 +1,14 @@
+@startuml
+skinparam componentStyle rectangle
+package "SustainaCore Workspace" {
+  [Sustainacore.Web] as Web
+  [Sustainacore.Mobile] as Mobile
+  [Sustainacore.Api] as Api
+  [Sustainacore.Application] as App
+  [Sustainacore.Domain] as Domain
+  [Sustainacore.Infrastructure] as Infra
+  [Sustainacore.Firebase] as Firebase
+  [Sustainacore.Payments] as Payments
+  [Sustainacore.Observability] as Obs
+}
+@enduml

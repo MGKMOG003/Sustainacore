@@ -1,0 +1,9 @@
+# CODEOWNERS
+ECHO is on.
+*       @your-org/arch-leads
+/src/Core/           @your-org/domain-leads
+/src/Infra/          @your-org/integrations
+/src/Web/            @your-org/web
+/src/Mobile/         @your-org/mobile
+/src/Observability/  @your-org/platform
+/docs/               @your-org/arch-leads

@@ -1,0 +1,34 @@
+﻿@page
+@model dynamic
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Login";
+}
+<h2>Login</h2>
+
+<form id="loginForm">
+    <div><label>Email</label><input type="email" id="email" required /></div>
+    <div><label>Password</label><input type="password" id="password" required /></div>
+    <button type="submit">Login</button>
+</form>
+
+<p id="msg" style="color:red"></p>
+
+<script type="module">
+    import { auth, login, currentRole } from "/js/firebase-auth.js";
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = email.value, pwd = password.value;
+      const msg = document.getElementById("msg");
+      msg.textContent = "";
+      try {
+        const user = await login(email, pwd);
+        const role = await currentRole(user);
+        if (role === "Admin") window.location.href = "/Dashboard/Admin";
+        else window.location.href = "/Dashboard/Client";
+      } catch (err) {
+        msg.textContent = err.message;
+      }
+    });
+</script>

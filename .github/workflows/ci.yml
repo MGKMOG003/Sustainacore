@@ -1,0 +1,55 @@
+﻿name: Build & Diagrams
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+jobs:
+  build-dotnet:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+            8.0.x
+
+      - name: Restore
+        run: dotnet restore Sustainacore.ci.slnf
+
+      - name: Build (no tests for now)
+        run: dotnet build --no-restore Sustainacore.ci.slnf
+
+  plantuml:
+    runs-on: windows-latest
+    needs: build-dotnet
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Export PlantUML PNGs
+        shell: pwsh
+        run: |
+          if(-not (Test-Path 'docs/diagrams')) { Write-Host 'No diagrams folder; skipping.'; exit 0 }
+          Invoke-WebRequest -UseBasicParsing -OutFile plantuml.jar -Uri https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+          java -jar .\plantuml.jar -tpng .\docs\diagrams\*.puml
+
+      - name: Upload diagram artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagrams-png
+          path: docs/diagrams/*.png
+          if-no-files-found: ignore

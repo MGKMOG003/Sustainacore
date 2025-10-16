@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Sustainacore.Application\Sustainacore.Application.csproj" />
+    <ProjectReference Include="..\..\Contracts\Sustainacore.Contracts\Sustainacore.Contracts.csproj" />
+    <ProjectReference Include="..\..\Observability\Sustainacore.Observability\Sustainacore.Observability.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\Dashboard\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+</Project>

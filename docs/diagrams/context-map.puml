@@ -1,0 +1,11 @@
+@startuml
+skinparam packageStyle rectangle
+package Projects
+package Maintenance
+package Contractors
+package Documents
+package Finance
+package Notifications
+package Identity
+package Analytics
+@enduml
