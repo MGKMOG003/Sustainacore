@@ -1,3 +1,3 @@
-
-![CI](https://github.com/<your-username>/Sustainacore/actions/workflows/ci.yml/badge.svg)
+﻿
+![CI](https://github.com/MGKMOG003/Sustainacore/actions/workflows/ci.yml/badge.svg)
 
