@@ -4,6 +4,7 @@
     Layout = "_Layout";
     ViewData["Title"] = "Register";
 }
+
 <h2>Register</h2>
 
 <form id="regForm">
@@ -19,16 +20,25 @@
 <script type="module">
     import { register, currentRole } from "/js/firebase-auth.js";
 
+    const roleToUrl = {
+      Admin: "/Dashboard/Admin",
+      ProjectManager: "/Dashboard/ProjectManager",
+      Contractor: "/Dashboard/Contractor",
+      Client: "/Dashboard/Client"
+    };
+
     document.getElementById("regForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const dn = displayName.value, em = email.value, pw = password.value;
+      const dn = displayName.value;
+      const em = email.value;
+      const pw = password.value;
       const msg = document.getElementById("msg");
       msg.textContent = "";
       try {
         const user = await register(em, pw, dn);
-        const role = await currentRole(user); // should be Client by default
-        if (role === "Admin") window.location.href = "/Dashboard/Admin";
-        else window.location.href = "/Dashboard/Client";
+        const role = await currentRole(user); // should be "Client" by default
+        const url  = roleToUrl[role] ?? "/Dashboard/Client";
+        window.location.href = url;
       } catch (err) {
         msg.textContent = err.message;
       }

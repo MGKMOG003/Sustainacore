@@ -1,0 +1,20 @@
+﻿@page
+@model PMModel
+@{
+    ViewData["Title"] = "Project Manager Dashboard";
+}
+
+<h1>Project Manager Dashboard</h1>
+
+<p>Create and manage projects.</p>
+
+<a asp-page="/Projects/Create">Create New Project</a>
+
+@* List projects assigned to this PM *@
+<ul>
+    @foreach (var project in Model.Projects)
+    {
+        <li>@project.Name</li>
+    }
+</ul>
+

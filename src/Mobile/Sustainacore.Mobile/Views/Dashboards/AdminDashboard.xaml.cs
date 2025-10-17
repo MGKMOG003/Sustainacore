@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Sustainacore.Mobile.Views.Dashboards;
 
-namespace Sustainacore.Mobile.Views.Dashboards
+public partial class AdminDashboard : ContentPage
 {
-    internal class AdminDashboard
+    public AdminDashboard(string name)
     {
+        Content = new VerticalStackLayout
+        {
+            Padding = 24,
+            Children =
+            {
+                new Label{ Text = $"Welcome, {name}", FontSize=22, FontAttributes=FontAttributes.Bold },
+                new Label{ Text = "Welcome to Admin dashboard." }
+            }
+        };
     }
 }

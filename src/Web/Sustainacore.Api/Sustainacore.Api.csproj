@@ -13,7 +13,4 @@
     <ProjectReference Include="..\..\Infra\Sustainacore.Infrastructure\Sustainacore.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Observability\Sustainacore.Observability\Sustainacore.Observability.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Pages\Account\" />
-  </ItemGroup>
 </Project>
