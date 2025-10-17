@@ -4,6 +4,7 @@
     Layout = "_Layout";
     ViewData["Title"] = "Login";
 }
+
 <h2>Login</h2>
 
 <form id="loginForm">
@@ -15,18 +16,26 @@
 <p id="msg" style="color:red"></p>
 
 <script type="module">
-    import { auth, login, currentRole } from "/js/firebase-auth.js";
+    import { login, currentRole } from "/js/firebase-auth.js";
+
+    const roleToUrl = {
+      Admin: "/Dashboard/Admin",
+      ProjectManager: "/Dashboard/ProjectManager",
+      Contractor: "/Dashboard/Contractor",
+      Client: "/Dashboard/Client"
+    };
 
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = email.value, pwd = password.value;
+      const em  = email.value;
+      const pwd = password.value;
       const msg = document.getElementById("msg");
       msg.textContent = "";
       try {
-        const user = await login(email, pwd);
+        const user = await login(em, pwd);
         const role = await currentRole(user);
-        if (role === "Admin") window.location.href = "/Dashboard/Admin";
-        else window.location.href = "/Dashboard/Client";
+        const url  = roleToUrl[role] ?? "/Dashboard/Client";
+        window.location.href = url;
       } catch (err) {
         msg.textContent = err.message;
       }

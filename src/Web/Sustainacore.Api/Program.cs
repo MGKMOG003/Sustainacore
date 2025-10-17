@@ -1,6 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Sustainacore.Application.Interfaces;
+using Sustainacore.Application.Services;
+using Sustainacore.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,14 +15,15 @@ var tokenIssuer = fb["TokenIssuer"]; // https://securetoken.google.com/<projectI
 
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false; // don't remap to MS names
 
+// Razor Pages with area security
 builder.Services
     .AddRazorPages(options =>
     {
-        // Secure Areas by default; dashboards require roles
         options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminOnly");
         options.Conventions.AuthorizeAreaFolder("ProjectManager", "/", "PMOnly");
         options.Conventions.AuthorizeAreaFolder("Contractor", "/", "ContractorOnly");
         options.Conventions.AuthorizeAreaFolder("Client", "/", "ClientOnly");
+
         // Allow anonymous for /Account (login/register)
         options.Conventions.AllowAnonymousToFolder("/Account");
     });
@@ -44,7 +48,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived = ctx =>
             {
-                if (string.IsNullOrEmpty(ctx.Token) && ctx.Request.Cookies.TryGetValue("id_token", out var cookieToken))
+                if (string.IsNullOrEmpty(ctx.Token) &&
+                    ctx.Request.Cookies.TryGetValue("id_token", out var cookieToken))
                     ctx.Token = cookieToken;
                 return Task.CompletedTask;
             }
@@ -71,13 +76,16 @@ builder.Services.AddSingleton(new FirebaseConfig(
     TokenIssuer: tokenIssuer!
 ));
 
+// Register domain/application services
+builder.Services.AddSingleton<IProjectRepository, InMemoryProjectRepository>();
+builder.Services.AddScoped<ProjectService>();
+
 builder.Services.AddScoped<FirebaseAuthService>();
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,4 +1,3 @@
-// tools/firebase-admin/seed.js
 const admin = require('firebase-admin');
 require('dotenv').config({ path: '.env.local' });
 
@@ -6,37 +5,39 @@ admin.initializeApp({
   credential: admin.credential.applicationDefault(),
   projectId: process.env.FIREBASE_PROJECT_ID
 });
-
 const auth = admin.auth();
-const db = admin.firestore();
 
 async function ensureUser(email, password, displayName, role) {
   let user;
   try {
     user = await auth.getUserByEmail(email);
-    console.log(`Found: ${email}`);
   } catch {
-    user = await auth.createUser({ email, password, displayName, emailVerified: true });
-    console.log(`Created: ${email}`);
+    user = await auth.createUser({
+      email,
+      password,
+      displayName,
+      emailVerified: true
+    });
   }
   await auth.setCustomUserClaims(user.uid, { role });
-  await db.collection('users').doc(user.uid).set({
-    email,
-    displayName,
-    role,
-    createdAt: admin.firestore.FieldValue.serverTimestamp()
-  }, { merge: true });
-  return user.uid;
 }
 
 async function main() {
-  const demo = [
-    { email: 'admin1@sustainacore.local',  pw: 'Passw0rd!', name: 'Admin One',  role: 'Admin'  },
-    { email: 'admin2@sustainacore.local',  pw: 'Passw0rd!', name: 'Admin Two',  role: 'Admin'  },
-    { email: 'client1@sustainacore.local', pw: 'Passw0rd!', name: 'Client One', role: 'Client' },
-    { email: 'client2@sustainacore.local', pw: 'Passw0rd!', name: 'Client Two', role: 'Client' },
+  const users = [
+    { email: 'admin1@sustainacore.demo',      password: 'Password123!', displayName: 'Admin One',      role: 'Admin' },
+    { email: 'admin2@sustainacore.demo',      password: 'Password123!', displayName: 'Admin Two',      role: 'Admin' },
+    { email: 'pm1@sustainacore.demo',         password: 'Password123!', displayName: 'PM One',         role: 'ProjectManager' },
+    { email: 'pm2@sustainacore.demo',         password: 'Password123!', displayName: 'PM Two',         role: 'ProjectManager' },
+    { email: 'contractor1@sustainacore.demo', password: 'Password123!', displayName: 'Contractor One', role: 'Contractor' },
+    { email: 'contractor2@sustainacore.demo', password: 'Password123!', displayName: 'Contractor Two', role: 'Contractor' },
+    { email: 'client1@sustainacore.demo',     password: 'Password123!', displayName: 'Client One',     role: 'Client' },
+    { email: 'client2@sustainacore.demo',     password: 'Password123!', displayName: 'Client Two',     role: 'Client' }
   ];
-  for (const u of demo) await ensureUser(u.email, u.pw, u.name, u.role);
-  console.log('Seeding complete.');
+  for (const u of users) {
+    await ensureUser(u.email, u.password, u.displayName, u.role);
+    console.log(`Seeded ${u.email}`);
+  }
+  console.log('All demo users created or updated.');
 }
-main().catch(err => { console.error(err); process.exit(1); });
+
+main().catch(err => console.error(err));

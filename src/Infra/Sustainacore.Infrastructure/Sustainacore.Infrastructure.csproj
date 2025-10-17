@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Sustainacore.Application\Sustainacore.Application.csproj" />
     <ProjectReference Include="..\..\Core\Sustainacore.Domain\Sustainacore.Domain.csproj" />
