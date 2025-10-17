@@ -1,4 +1,29 @@
-﻿@page
-@model Sustainacore.Web.Areas.Admin.Pages.Users.EditModel
+﻿@page "{id}"
+@model EditUserModel
 @{
+    ViewData["Title"] = "Edit User Role";
+}
+
+<h2>Edit User Role</h2>
+
+@if (Model.UserItem == null)
+{
+    <p>User not found.</p>
+}
+else
+{
+    <form method="post">
+        <div><strong>Email:</strong> @Model.UserItem.Email</div>
+        <div><strong>Name:</strong>  @Model.UserItem.DisplayName</div>
+        <div>
+            <label>Role</label>
+            <select asp-for="Input.Role">
+                <option value="Admin">Admin</option>
+                <option value="ProjectManager">Project Manager</option>
+                <option value="Contractor">Contractor</option>
+                <option value="Client">Client</option>
+            </select>
+        </div>
+        <button type="submit">Save</button>
+    </form>
 }

@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Sustainacore.Domain.Entities;
 
 namespace Sustainacore.Application.Interfaces
 {
-    internal class IUserRepository
+    /// <summary>
+    /// Defines basic persistence operations for user management.
+    /// A later implementation could wrap Firebase Admin or a database.
+    /// </summary>
+    public interface IUserRepository
     {
+        Task<IReadOnlyList<User>> GetAllAsync();
+        Task<User?> GetByIdAsync(string userId);
+        Task UpdateRoleAsync(string userId, string newRole);
     }
 }
+

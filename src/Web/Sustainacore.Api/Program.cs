@@ -76,6 +76,13 @@ builder.Services.AddSingleton(new FirebaseConfig(
     TokenIssuer: tokenIssuer!
 ));
 
+// existing registrations (ProjectService, FirebaseAuthService, etc.)
+builder.Services.AddSingleton<IProjectRepository, InMemoryProjectRepository>();
+builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();    // add this
+builder.Services.AddScoped<ProjectService>();
+builder.Services.AddScoped<UserService>();                                   // add this
+
+
 // Register domain/application services
 builder.Services.AddSingleton<IProjectRepository, InMemoryProjectRepository>();
 builder.Services.AddScoped<ProjectService>();

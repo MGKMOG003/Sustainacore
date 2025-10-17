@@ -1,12 +1,26 @@
-using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Sustainacore.Application.Services;
+using Sustainacore.Domain.Entities;
 
 namespace Sustainacore.Web.Areas.Admin.Pages.Users
 {
-    public class IndexModel : PageModel
+    [Authorize(Policy = "AdminOnly")]
+    public class UsersIndexModel : PageModel
     {
-        public void OnGet()
+        private readonly UserService _service;
+        public IReadOnlyList<User> Users { get; private set; } = new List<User>();
+
+        public UsersIndexModel(UserService service)
         {
+            _service = service;
+        }
+
+        public async Task OnGetAsync()
+        {
+            Users = await _service.ListUsersAsync();
         }
     }
 }
