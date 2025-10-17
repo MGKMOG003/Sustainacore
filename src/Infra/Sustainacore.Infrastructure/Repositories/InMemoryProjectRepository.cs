@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sustainacore.Application.Interfaces;
@@ -8,36 +7,30 @@ using Sustainacore.Domain.Entities;
 namespace Sustainacore.Infrastructure.Repositories
 {
     /// <summary>
-    /// Development-only in-memory repository for projects.  Replace this with
-    /// a database implementation for production.
+    /// In-memory repository seeded with demo users.  Replace with actual Firebase-admin implementation later.
     /// </summary>
-    public class InMemoryProjectRepository : IProjectRepository
+    public class InMemoryUserRepository : IUserRepository
     {
-        private readonly List<Project> _projects = new();
-
-        public Task AddAsync(Project project)
+        private readonly List<User> _users = new()
         {
-            _projects.Add(project);
-            return Task.CompletedTask;
-        }
+            new() { Id = "1", Email = "admin1@sustainacore.demo",      DisplayName = "Admin One",      Role = "Admin" },
+            new() { Id = "2", Email = "admin2@sustainacore.demo",      DisplayName = "Admin Two",      Role = "Admin" },
+            new() { Id = "3", Email = "pm1@sustainacore.demo",         DisplayName = "PM One",         Role = "ProjectManager" },
+            new() { Id = "4", Email = "pm2@sustainacore.demo",         DisplayName = "PM Two",         Role = "ProjectManager" },
+            new() { Id = "5", Email = "contractor1@sustainacore.demo", DisplayName = "Contractor One", Role = "Contractor" },
+            new() { Id = "6", Email = "contractor2@sustainacore.demo", DisplayName = "Contractor Two", Role = "Contractor" },
+            new() { Id = "7", Email = "client1@sustainacore.demo",     DisplayName = "Client One",     Role = "Client" },
+            new() { Id = "8", Email = "client2@sustainacore.demo",     DisplayName = "Client Two",     Role = "Client" }
+        };
 
-        public Task<IReadOnlyList<Project>> GetAllAsync(string userId)
+        public Task<IReadOnlyList<User>> GetAllAsync() => Task.FromResult((IReadOnlyList<User>)_users);
+
+        public Task<User?> GetByIdAsync(string userId) => Task.FromResult(_users.SingleOrDefault(u => u.Id == userId));
+
+        public Task UpdateRoleAsync(string userId, string newRole)
         {
-            var projects = _projects.Where(p => p.UserIds.Contains(userId)).ToList();
-            return Task.FromResult((IReadOnlyList<Project>)projects);
-        }
-
-        public Task<Project?> GetByIdAsync(Guid id)
-        {
-            return Task.FromResult(_projects.SingleOrDefault(p => p.Id == id));
-        }
-
-        public Task AssignUserAsync(Guid projectId, string userId)
-        {
-            var project = _projects.SingleOrDefault(p => p.Id == projectId);
-            if (project != null && !project.UserIds.Contains(userId))
-                project.UserIds.Add(userId);
-
+            var user = _users.SingleOrDefault(u => u.Id == userId);
+            if (user != null) user.Role = newRole;
             return Task.CompletedTask;
         }
     }
