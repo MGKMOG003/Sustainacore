@@ -1,8 +1,28 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    // Sets the page title in the browser tab
+    ViewData["Title"] = "Home";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <!-- Main welcome heading -->
+    <h1 class="display-4">Welcome to Sustainacore</h1>
+
+    <!-- Brief description about the application -->
+    <p>
+        Sustainacore is a platform for planning and managing sustainability projects.
+        It connects clients, project managers, contractors and administrators to collaborate
+        on eco‑friendly initiatives.
+    </p>
+    <p>
+        Use Sustainacore to create new projects, assign team members, and monitor progress —
+        all in one place.
+    </p>
+
+    <!-- Call to action: prompts users to log in or register -->
+    <p>
+        <a class="btn btn-primary" asp-page="/Account/Login">Log in</a>
+        or
+        <a class="btn btn-link" asp-page="/Account/Register">Register</a>
+        to get started.
+    </p>
 </div>
