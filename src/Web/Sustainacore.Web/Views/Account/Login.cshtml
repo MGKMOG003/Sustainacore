@@ -1,43 +1,62 @@
-﻿@page
-@model dynamic
+﻿
 @{
-    Layout = "_Layout";
+    Layout = null;                         // remove the usual layout for a dedicated login page
     ViewData["Title"] = "Login";
 }
 
-<h2>Login</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Sustainacore</title>
+    <link rel="stylesheet" href="~/css/login.css" />
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <img src="~/img/sustainacore-logo.png" alt="Sustainacore logo" class="logo" />
+            <h1 class="brand-title">sustainacore</h1>
+            <p class="subtitle">Welcome back! Please log in to your account.</p>
 
-<form id="loginForm">
-    <div><label>Email</label><input type="email" id="email" required /></div>
-    <div><label>Password</label><input type="password" id="password" required /></div>
-    <button type="submit">Login</button>
-</form>
+            <form id="loginForm">
+                <input type="email" id="email" class="form-input" placeholder="Email" required />
+                <input type="password" id="password" class="form-input" placeholder="Password" required />
+                <div class="forgot">
+                    <a asp-page="/Account/ForgotPassword">Forgot your password?</a>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
 
-<p id="msg" style="color:red"></p>
+            <div id="msg" class="error"></div>
+        </div>
+    </div>
 
-<script type="module">
-    import { login, currentRole } from "/js/firebase-auth.js";
+    <script type="module">
+        import { login, currentRole } from "/js/firebase-auth.js";
 
-    const roleToUrl = {
-      Admin: "/Dashboard/Admin",
-      ProjectManager: "/Dashboard/ProjectManager",
-      Contractor: "/Dashboard/Contractor",
-      Client: "/Dashboard/Client"
-    };
+        const roleToUrl = {
+            Admin: "/Dashboard/Admin",
+            ProjectManager: "/Dashboard/ProjectManager",
+            Contractor: "/Dashboard/Contractor",
+            Client: "/Dashboard/Client"
+        };
 
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const em  = email.value;
-      const pwd = password.value;
-      const msg = document.getElementById("msg");
-      msg.textContent = "";
-      try {
-        const user = await login(em, pwd);
-        const role = await currentRole(user);
-        const url  = roleToUrl[role] ?? "/Dashboard/Client";
-        window.location.href = url;
-      } catch (err) {
-        msg.textContent = err.message;
-      }
-    });
-</script>
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const em  = email.value;
+            const pwd = password.value;
+            const msg = document.getElementById("msg");
+            msg.textContent = "";
+            try {
+                const user = await login(em, pwd);
+                const role = await currentRole(user);
+                const url  = roleToUrl[role] ?? "/Dashboard/Client";
+                window.location.href = url;
+            } catch (err) {
+                msg.textContent = err.message;
+            }
+        });
+    </script>
+</body>
+</html>
