@@ -8,12 +8,12 @@ using Sustainacore.Domain.Entities;
 namespace Sustainacore.Web.Areas.Admin.Pages.Users
 {
     [Authorize(Policy = "AdminOnly")]
-    public class UsersIndexModel : PageModel
+    public class IndexModel : PageModel
     {
         private readonly UserService _service;
         public IReadOnlyList<User> Users { get; private set; } = new List<User>();
 
-        public UsersIndexModel(UserService service)
+        public IndexModel(UserService service)
         {
             _service = service;
         }

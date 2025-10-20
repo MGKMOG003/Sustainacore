@@ -8,12 +8,12 @@ using Sustainacore.Domain.Entities;
 namespace Sustainacore.Web.Areas.ProjectManager.Pages
 {
     [Authorize(Policy = "PMOnly")]
-    public class PMModel : PageModel
+    public class IndexModel : PageModel
     {
         private readonly ProjectService _service;
         public IReadOnlyList<Project> Projects { get; private set; } = new List<Project>();
 
-        public PMModel(ProjectService service)
+        public IndexModel(ProjectService service)
         {
             _service = service;
         }

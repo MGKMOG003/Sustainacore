@@ -1,5 +1,5 @@
 ﻿@page
-@model UsersIndexModel
+@model Sustainacore.Web.Areas.Admin.Pages.Users.IndexModel
 @{
     ViewData["Title"] = "User Management";
 }
@@ -23,7 +23,7 @@
                 <td>@u.DisplayName</td>
                 <td>@u.Role</td>
                 <td>
-                    <a asp-page="/Users/Edit" asp-route-id="@u.Id">Edit Role</a>
+                    <a asp-page="Edit" asp-route-id="@u.Id">Edit Role</a>
                 </td>
             </tr>
         }
