@@ -1,40 +1,51 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC
-builder.Services.AddControllersWithViews();
+// AuthN/AuthZ (Firebase ID tokens)
+var projectId = builder.Configuration["Firebase:ProjectId"];
+var issuer = builder.Configuration["Firebase:TokenIssuer"] ?? (projectId is null ? null : $"https://securetoken.google.com/{projectId}");
+if (!string.IsNullOrWhiteSpace(projectId) && !string.IsNullOrWhiteSpace(issuer))
+{
+    builder.Services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(o =>
+        {
+            o.Authority = issuer;
+            o.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = issuer,
+                ValidateAudience = true,
+                ValidAudience = projectId,
+                ValidateLifetime = true
+            };
+        });
+}
+builder.Services.AddAuthorization();
 
-// Cookie auth (demo)
-builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-        options.AccessDeniedPath = "/Account/AccessDenied";
-        options.SlidingExpiration = true;
-    });
+builder.Services.AddRazorPages();
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+// Standard pipeline
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    app.UseDeveloperExceptionPage();
 }
-
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+
 app.UseRouting();
 
-app.UseAuthentication();   // <-- add this
+// IMPORTANT: AuthN then AuthZ
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}")
-   .WithStaticAssets();
+// Razor Pages + MVC routes
+app.MapRazorPages();
+app.MapDefaultControllerRoute();
 
 app.Run();

@@ -2,7 +2,58 @@
 @model Sustainacore.Web.Areas.Admin.Pages.IndexModel
 @{
     ViewData["Title"] = "Admin Dashboard";
+    Layout = "/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Admin Dashboard</h1>
-<p>Manage users, roles and projects.</p>
+<h2>Admin – User Management</h2>
+
+<div style="margin:12px 0;">
+    <label>Bearer Token:</label>
+    <input id="token" type="password" placeholder="Paste Firebase ID token" style="width:600px" />
+    <button onclick="loadUsers()">Load Users</button>
+</div>
+
+<table id="users" class="table table-striped">
+    <thead>
+        <tr><th>Email</th><th>Name</th><th>Role</th><th>Action</th></tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    const roles = ["Admin","ProjectManager","Contractor","Client"];
+
+    async function loadUsers(){
+      const t = document.getElementById('token').value.trim();
+      const resp = await fetch('/api/admin/users', { headers: { Authorization: 'Bearer ' + t }});
+      if(!resp.ok){ alert('Failed: ' + resp.status); return; }
+      const data = await resp.json();
+      const tb = document.querySelector('#users tbody');
+      tb.innerHTML = '';
+      data.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${u.email}</td>
+          <td>${u.displayName ?? ""}</td>
+          <td>
+            <select id="role-${u.uid}">
+              ${roles.map(r => `<option value="${r}" ${u.role===r?'selected':''}>${r}</option>`).join('')}
+            </select>
+          </td>
+          <td><button onclick="saveRole('${u.uid}')">Save</button></td>`;
+        tb.appendChild(tr);
+      });
+    }
+
+    async function saveRole(uid){
+      const t = document.getElementById('token').value.trim();
+      const role = document.getElementById('role-'+uid).value;
+      const resp = await fetch('/api/admin/users/'+uid+'/role', {
+        method: 'PATCH',
+        headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + t },
+        body: JSON.stringify({ role })
+      });
+      if(resp.ok) alert('Role updated');
+      else alert('Failed: ' + await resp.text());
+    }
+</script>

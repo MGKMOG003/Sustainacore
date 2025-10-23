@@ -1,51 +1,130 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Maui.Controls;
 
 namespace Sustainacore.Mobile.Views;
 
 public partial class LoginPage : ContentPage
 {
-    private readonly FirebaseAuthClient _auth;
+    private const string ApiKey = "AIzaSyCXjHkXlfbLAcLXnQnQBllzU5T2NffxYnA";
+    private static readonly Uri Endpoint = new Uri($"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={ApiKey}");
 
     public LoginPage()
     {
         InitializeComponent();
-        _auth = new FirebaseAuthClient();
     }
 
     private async void OnLoginClicked(object sender, EventArgs e)
     {
-        var (ok, msg, token, display) = await _auth.LoginAsync(EmailEntry.Text!, PasswordEntry.Text!);
-        if (!ok || string.IsNullOrEmpty(token)) { StatusLabel.Text = "Login failed."; return; }
+        ErrorLabel.IsVisible = false;
+        LoadingIndicator.IsVisible = true;
+        LoadingIndicator.IsRunning = true;
 
-        var role = DecodeRole(token) ?? "Client";
-        await NavigateToDashboard(role, display ?? EmailEntry.Text!);
-    }
-
-    private async void OnRegisterClicked(object sender, EventArgs e)
-    {
-        var (ok, msg, token, display) = await _auth.RegisterAsync(EmailEntry.Text!, PasswordEntry.Text!, EmailEntry.Text!);
-        if (!ok || string.IsNullOrEmpty(token)) { StatusLabel.Text = "Registration failed."; return; }
-
-        await NavigateToDashboard("Client", display ?? EmailEntry.Text!);
-    }
-
-    private static string? DecodeRole(string jwt)
-    {
-        var token = new JwtSecurityTokenHandler().ReadJwtToken(jwt);
-        return token.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
-    }
-
-    private Task NavigateToDashboard(string role, string displayName)
-    {
-        Page target = role switch
+        try
         {
-            "Admin" => new Dashboards.AdminDashboard(displayName),
-            "ProjectManager" => new Dashboards.PMDashboard(displayName),
-            "Contractor" => new Dashboards.ContractorDashboard(displayName),
-            _ => new Dashboards.ClientDashboard(displayName)
-        };
-        Application.Current!.MainPage = new NavigationPage(target);
-        return Task.CompletedTask;
+            var email = EmailEntry.Text?.Trim();
+            var password = PasswordEntry.Text;
+
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            {
+                ShowError("Please enter both email and password.");
+                return;
+            }
+
+            var payload = new
+            {
+                email,
+                password,
+                returnSecureToken = true
+            };
+
+            using var http = new HttpClient();
+            var json = JsonSerializer.Serialize(payload);
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+            using var resp = await http.PostAsync(Endpoint, content);
+
+            var respBody = await resp.Content.ReadAsStringAsync();
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                // Try to parse Firebase error payload
+                try
+                {
+                    var fbErr = JsonSerializer.Deserialize<FirebaseError>(respBody);
+                    var msg = fbErr?.error?.message ?? resp.StatusCode.ToString();
+                    ShowError($"Login failed: {msg}");
+                }
+                catch
+                {
+                    ShowError($"Login failed: {resp.StatusCode}");
+                }
+                return;
+            }
+
+            var auth = JsonSerializer.Deserialize<SignInResponse>(respBody);
+            var idToken = auth?.idToken;
+            if (string.IsNullOrWhiteSpace(idToken))
+            {
+                ShowError("Invalid login response.");
+                return;
+            }
+
+            await SecureStorage.SetAsync("auth_token", idToken);
+            await SecureStorage.SetAsync("user_email", email!);
+
+            // Example: prepare HttpClient with Bearer for your API later
+            // http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", idToken);
+
+            if (Shell.Current is not null)
+            {
+                await Shell.Current.GoToAsync("//Dashboard");
+            }
+            else
+            {
+                await Navigation.PushAsync(new DashboardPage());
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowError($"Error: {ex.Message}");
+        }
+        finally
+        {
+            LoadingIndicator.IsRunning = false;
+            LoadingIndicator.IsVisible = false;
+        }
+    }
+
+    private void ShowError(string message)
+    {
+        ErrorLabel.Text = message;
+        ErrorLabel.IsVisible = true;
+        LoadingIndicator.IsRunning = false;
+        LoadingIndicator.IsVisible = false;
+    }
+
+    // --- DTOs for Firebase REST response ---
+    private sealed class SignInResponse
+    {
+        public string idToken { get; set; } = "";
+        public string email { get; set; } = "";
+        public string refreshToken { get; set; } = "";
+        public string expiresIn { get; set; } = "";
+        public string localId { get; set; } = "";
+        public bool registered { get; set; }
+    }
+
+    private sealed class FirebaseError
+    {
+        public ErrorDetails error { get; set; } = new();
+        public sealed class ErrorDetails
+        {
+            public int code { get; set; }
+            public string message { get; set; } = "";
+        }
     }
 }
-
