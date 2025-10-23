@@ -1,20 +1,14 @@
 ﻿@page
-@model PMModel
+@model Sustainacore.Web.Areas.Client.Pages.IndexModel
 @{
-    ViewData["Title"] = "Project Manager Dashboard";
+    ViewData["Title"] = "Client Dashboard";
 }
 
-<h1>Project Manager Dashboard</h1>
+<h1>Client Dashboard</h1>
 
-<p>Create and manage projects.</p>
-
-<a asp-page="/Projects/Create">Create New Project</a>
-
-@* List projects assigned to this PM *@
 <ul>
     @foreach (var project in Model.Projects)
     {
         <li>@project.Name</li>
     }
 </ul>
-

@@ -1,47 +1,61 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net.Http;
+using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
-public class FirebaseAuthService
+namespace Sustainacore.Api.Services
 {
-    private readonly IHttpClientFactory _http;
-    private readonly FirebaseConfig _cfg;
-
-    public FirebaseAuthService(IHttpClientFactory http, FirebaseConfig cfg)
+    public sealed class FirebaseAuthService
     {
-        _http = http;
-        _cfg = cfg;
-    }
+        private readonly string _apiKey;
+        private readonly string _authBase;
+        private readonly HttpClient _http;
 
-    public async Task<(bool ok, string message, string? idToken, string? displayName)> RegisterAsync(string email, string password, string displayName)
-    {
-        var client = _http.CreateClient("FirebaseAuth");
-        var payload = new
+        public FirebaseAuthService(IConfiguration config, IHttpClientFactory httpFactory)
         {
-            email,
-            password,
-            displayName,
-            returnSecureToken = true
-        };
-        var resp = await client.PostAsJsonAsync($"accounts:signUp?key={_cfg.ApiKey}", payload);
-        if (!resp.IsSuccessStatusCode)
-            return (false, await resp.Content.ReadAsStringAsync(), null, null);
+            _apiKey  = config["Firebase:ApiKey"]  ?? throw new InvalidOperationException("Missing Firebase:ApiKey");
+            _authBase = config["Firebase:AuthBase"] ?? "https://identitytoolkit.googleapis.com/v1";
+            _http = httpFactory.CreateClient(nameof(FirebaseAuthService));
+        }
 
-        var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync()).RootElement;
-        var idToken = doc.GetProperty("idToken").GetString();
-        return (true, "OK", idToken, displayName);
-    }
+        public async Task<(bool ok, string idToken, string? error)> SignInAsync(string email, string password)
+        {
+            var url = $"{_authBase}/accounts:signInWithPassword?key={_apiKey}";
+            var payload = new { email, password, returnSecureToken = true };
+            using var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            using var resp = await _http.PostAsync(url, content);
+            var body = await resp.Content.ReadAsStringAsync();
 
-    public async Task<(bool ok, string message, string? idToken, string? displayName)> LoginAsync(string email, string password)
-    {
-        var client = _http.CreateClient("FirebaseAuth");
-        var payload = new { email, password, returnSecureToken = true };
-        var resp = await client.PostAsJsonAsync($"accounts:signInWithPassword?key={_cfg.ApiKey}", payload);
-        if (!resp.IsSuccessStatusCode)
-            return (false, await resp.Content.ReadAsStringAsync(), null, null);
+            if (!resp.IsSuccessStatusCode)
+            {
+                try
+                {
+                    var err = JsonSerializer.Deserialize<FirebaseError>(body);
+                    return (false, string.Empty, err?.error?.message ?? resp.StatusCode.ToString());
+                }
+                catch
+                {
+                    return (false, string.Empty, resp.StatusCode.ToString());
+                }
+            }
 
-        var json = JsonDocument.Parse(await resp.Content.ReadAsStringAsync()).RootElement;
-        var idToken = json.GetProperty("idToken").GetString();
-        var displayName = json.TryGetProperty("displayName", out var dn) ? dn.GetString() : email;
-        return (true, "OK", idToken, displayName);
+            var ok = JsonSerializer.Deserialize<SignInResponse>(body);
+            return (true, ok?.idToken ?? string.Empty, null);
+        }
+
+        private sealed class SignInResponse
+        {
+            public string idToken { get; set; } = string.Empty;
+        }
+
+        private sealed class FirebaseError
+        {
+            public ErrorDetails error { get; set; } = new();
+            public sealed class ErrorDetails
+            {
+                public string message { get; set; } = string.Empty;
+            }
+        }
     }
 }

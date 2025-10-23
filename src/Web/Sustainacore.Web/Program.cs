@@ -1,29 +1,51 @@
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// AuthN/AuthZ (Firebase ID tokens)
+var projectId = builder.Configuration["Firebase:ProjectId"];
+var issuer = builder.Configuration["Firebase:TokenIssuer"] ?? (projectId is null ? null : $"https://securetoken.google.com/{projectId}");
+if (!string.IsNullOrWhiteSpace(projectId) && !string.IsNullOrWhiteSpace(issuer))
+{
+    builder.Services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(o =>
+        {
+            o.Authority = issuer;
+            o.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = issuer,
+                ValidateAudience = true,
+                ValidAudience = projectId,
+                ValidateLifetime = true
+            };
+        });
+}
+builder.Services.AddAuthorization();
+
+builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+// Standard pipeline
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseDeveloperExceptionPage();
 }
-
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+
 app.UseRouting();
 
+// IMPORTANT: AuthN then AuthZ
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+// Razor Pages + MVC routes
+app.MapRazorPages();
+app.MapDefaultControllerRoute();
 
 app.Run();

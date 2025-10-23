@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\Sustainacore.Domain\Sustainacore.Domain.csproj" />
     <ProjectReference Include="..\Sustainacore.SharedKernel\Sustainacore.SharedKernel.csproj" />
@@ -7,5 +7,6 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;Web+Api</Configurations>
   </PropertyGroup>
 </Project>

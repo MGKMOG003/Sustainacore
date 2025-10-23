@@ -21,3 +21,13 @@
     }
   }
 }
+{
+  "profiles": {
+    "Sustainacore.Api": {
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:5180",
+      "dotnetRunMessages": true,
+      "environmentVariables": { "ASPNETCORE_ENVIRONMENT": "Development" }
+    }
+  }
+}

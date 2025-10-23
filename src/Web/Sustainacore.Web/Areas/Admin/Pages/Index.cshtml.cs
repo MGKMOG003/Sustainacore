@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace Sustainacore.Web.Areas.Admin.Pages
 {
     [Authorize(Policy = "AdminOnly")]
-    public class AdminModel : PageModel
+    public class IndexModel : PageModel
     {
         public void OnGet() { }
     }
